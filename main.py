@@ -8,6 +8,10 @@ import random
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
+@dp.message(Command('weather'))
+async def weather(message: Message):
+    await message.answer('Прогноз погоды в Москве на завтра')
+
 @dp.message(Command('photo'))
 async def photo(message: Message):
     list = ['https://avatars.dzeninfra.ru/get-zen_doc/4350071/pub_60de8be6af5456312960b7a9_60ecd6de528cff4cb60ac9e8/scale_1200',
