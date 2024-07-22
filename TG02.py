@@ -11,25 +11,8 @@ import asyncio
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
-city = "Rome"
 
-@dp.message(Command('weather'))
-async def weather(message: Message):
-    await message.answer('Запрашиваю прогноз погоды...')
-    api_key = "837f0aa0103469641de4270ffb811a57"
-    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric&lang=ru"
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            if response.status == 200:
-                data = await response.json()
-                temperature = data['main']['temp']
-                weather_description = data['weather'][0]['description']
-                await message.answer(f'Погода в {city}: {temperature}°C, {weather_description}.')
-            else:
-                await message.answer('Не удалось получить данные о погоде. Попробуйте позже.')
-
-
-@dp.message(Command('photo'))
+@dp.message(Command('photo', prefix='&'))
 async def photo(message: Message):
     list = ['https://avatars.dzeninfra.ru/get-zen_doc/4350071/pub_60de8be6af5456312960b7a9_60ecd6de528cff4cb60ac9e8/scale_1200',
             'https://i.ytimg.com/vi/ef_wAHtfRkg/maxresdefault.jpg',
@@ -43,6 +26,7 @@ async def react_photo(message: Message):
     list = ['Ого, какая фотка!', 'непонятно что это!', 'не отправляй мне такое больше!']
     rand_answ = random.choice(list)
     await message.answer(rand_answ)
+    await bot.download(message.photo[-1], destination=f'tmp/{message.photo[-1].file_id}.jpg')
 
 
 @dp.message(F.text == "Что такое ИИ")
@@ -56,7 +40,16 @@ async def help(message: Message):
 
 @dp.message(CommandStart())
 async def start(message: Message):
-    await message.answer('Привет! Я бот!')
+    await message.answer(f'Привет, {message.from_user.first_name}!')
+
+
+@dp.message()
+async def start(message: Message):
+    if message.text.lower() == "тест":
+        await message.answer('тестируем')
+    else:
+        await message.answer(f'Сам {message.text}!')
+        # await message.send_copy(chat_id=message.chat.id)
 
 
 async def main():
