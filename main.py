@@ -4,13 +4,30 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
 from config import TOKEN
 import random
+import requests
+# from aiogram.dispatcher import filters
+import aiohttp
+import asyncio
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
+city = "Boston"
 
 @dp.message(Command('weather'))
 async def weather(message: Message):
-    await message.answer('Прогноз погоды в Москве на завтра')
+    await message.answer('Запрашиваю прогноз погоды...')
+    api_key = "837f0aa0103469641de4270ffb811a57"
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric&lang=ru"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                data = await response.json()
+                temperature = data['main']['temp']
+                weather_description = data['weather'][0]['description']
+                await message.answer(f'Погода в {city}: {temperature}°C, {weather_description}.')
+            else:
+                await message.answer('Не удалось получить данные о погоде. Попробуйте позже.')
+
 
 @dp.message(Command('photo'))
 async def photo(message: Message):
