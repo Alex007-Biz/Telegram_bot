@@ -20,6 +20,16 @@ async def video(message: Message):
     video = FSInputFile("video.mp4")
     await bot.send_video(message.chat.id, video)
 
+@dp.message(Command('voice'))
+async def voice(message: Message):
+    voice = FSInputFile("sample.ogg")
+    await message.answer_voice(voice)
+
+@dp.message(Command('doc'))
+async def doc(message: Message):
+    doc = FSInputFile("TG02.pdf")
+    await bot.send_document(message.chat.id, doc)
+
 @dp.message(Command('audio'))
 async def audio(message: Message):
     # await bot.send_chat_action(message.chat.id, 'upload_video')
@@ -36,10 +46,10 @@ async def training(message: Message):
     rand_tr = random.choice(training_list)
     await message.answer(f'Это ваша мини-тренировка на сегодня {rand_tr}')
     tts = gTTS(text=rand_tr, lang='ru')
-    tts.save('training.mp3')
-    audio = FSInputFile('training.mp3')
-    await bot.send_audio(message.chat.id, audio)
-    os.remove('training.mp3')
+    tts.save('training.ogg')
+    audio = FSInputFile('training.ogg')
+    await bot.send_voice(message.chat.id, audio)
+    os.remove('training.ogg')
 
 @dp.message(Command('photo'))
 async def photo(message: Message):
