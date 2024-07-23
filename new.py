@@ -59,6 +59,12 @@ async def city(message: Message, state: FSMContext):
     await state.update_data(city=message.text)
     user_data = await state.get_data()
 
+    conn = sqlite3.connect('user_data.db')
+    cur = conn.cursor()
+    cur.execute('''
+    INSERT INTO (name, age, city) VALUES (?, ?, ?)''', (user_data['name'], user_data['age'], user_data['city']))
+    conn.commit()
+    conn.close()
 
 
 async def main():
