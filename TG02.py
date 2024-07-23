@@ -1,5 +1,5 @@
 import asyncio
-from aiogram import Bot, Dispatcher, F
+from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, FSInputFile
 from config import TOKEN
@@ -10,9 +10,33 @@ import aiohttp
 import asyncio
 from gtts import gTTS
 import os
+from translate  import Translator
+# from aiogram.contrib.fsm_storage.memory import MemoryStorage
+# from aiogram.utils import executor
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
+
+ru_letters = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
+en_letters = 'abcdefghijklmnopqrstuvwxyz'
+
+@dp.message()
+async def echo(message: types.Message):
+    text = message.text.strip()  # Убираем лишние пробелы
+    if not text:  # Проверка на пустое сообщение
+        await message.answer("Сообщение пустое.")
+        return
+
+    if text[0].lower() in ru_letters:
+        translator = Translator(from_lang='russian', to_lang='english')
+    elif text[0].lower() in en_letters:
+        translator = Translator(from_lang='english', to_lang='russian')
+    else:
+        await message.answer("Я не понимаю языка этого сообщения.")
+        return
+    translation = translator.translate(text)
+    await message.answer(translation)
+
 
 @dp.message(Command('video'))
 async def video(message: Message):
@@ -65,7 +89,7 @@ async def react_photo(message: Message):
     list = ['Ого, какая фотка!', 'непонятно что это!', 'не отправляй мне такое больше!']
     rand_answ = random.choice(list)
     await message.answer(rand_answ)
-    await bot.download(message.photo[-1], destination=f'tmp/{message.photo[-1].file_id}.jpg')
+    await bot.download(message.photo[-1], destination=f'img/{message.photo[-1].file_id}.jpg')
 
 
 @dp.message(F.text == "Что такое ИИ")
