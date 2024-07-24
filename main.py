@@ -3,6 +3,7 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
 from config import TOKEN
+from keyboards import main
 import random
 import requests
 # from aiogram.dispatcher import filters
@@ -52,7 +53,7 @@ async def aitext(message: Message):
 
 @dp.message(Command('help'))
 async def help(message: Message):
-    await message.answer('Этот бот умеет выполнять команды: \n /start \n /help')
+    await message.answer('Этот бот умеет выполнять команды: \n /start \n /help \n /photo')
 
 @dp.message(CommandStart())
 async def start(message: Message):
