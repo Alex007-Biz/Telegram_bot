@@ -1,7 +1,9 @@
 import asyncio
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import CommandStart, Command
-from aiogram.types import Message
+from aiogram.types import Message, FSInputFile, CallbackQuery
+from gtts import gTTS
+import os
 from config import TOKEN
 import keyboards as kb
 import random
