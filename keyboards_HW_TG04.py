@@ -13,7 +13,17 @@ inline_keyboard_test = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="Новости", url="https://www.plitkanadom.ru")]
 ])
 
-test = ["кнопка 1", "кнопка 2", "кнопка 3", "кнопка 4"]
+inline_keyboard_2 = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="Показать больше", callback_data='more')]
+])
+
+inline_keyboard_3 = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="Опция 1", callback_data='option1')],
+    [InlineKeyboardButton(text="Опция 2", callback_data='option2')]
+
+])
+
+test = ["Опция 1", "Опция 2"]
 
 async def test_keyboard():
     keyboard = ReplyKeyboardBuilder()

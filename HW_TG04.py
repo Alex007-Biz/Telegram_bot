@@ -31,9 +31,23 @@ async def test_button(message: Message):
 
 @dp.message(Command('links'))
 async def links(message: Message):
-    await message.answer(f'Привет, {message.from_user.first_name}!', reply_markup=kb.inline_keyboard_test) #Клавиатура Inline
+    await message.answer(f'меню:', reply_markup=kb.inline_keyboard_test) #Клавиатура Inline
 
+@dp.message(Command('dynamic'))
+async def dynamic(message: Message):
+    await message.answer(f'Привет!', reply_markup=kb.inline_keyboard_2) #Клавиатура Inline
 
+@dp.callback_query(F.data == "more")
+async def more(callback: CallbackQuery):
+    await callback.message.answer(f'Обработка нажатия на кнопку "Показать больше"', reply_markup=kb.inline_keyboard_3)
+
+@dp.callback_query(F.data == "option1")
+async def option1(callback: CallbackQuery):
+    await callback.message.answer(f'Обработка нажатия на кнопку "Опция 1"')
+
+@dp.callback_query(F.data == "option2")
+async def option1(callback: CallbackQuery):
+    await callback.message.answer(f'Обработка нажатия на кнопку "Опция 2"')
 
 @dp.message(CommandStart())
 async def start(message: Message):
