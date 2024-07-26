@@ -5,7 +5,6 @@ from aiogram.types import Message
 import random
 import requests
 
-# from CONFIG import TOKEN, THE_CAT_API_KEY
 from config import TOKEN, THE_CAT_API_KEY
 
 bot = Bot(token=TOKEN)
