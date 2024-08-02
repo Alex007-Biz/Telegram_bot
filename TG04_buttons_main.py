@@ -1,4 +1,4 @@
-# import asyncio
+import asyncio
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, FSInputFile, CallbackQuery
@@ -9,7 +9,7 @@ import keyboards as kb
 # import random
 # import requests
 # import aiohttp
-import asyncio
+
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
