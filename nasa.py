@@ -5,7 +5,7 @@ from aiogram.types import Message, FSInputFile, CallbackQuery
 # from gtts import gTTS
 # import os
 from config2 import TOKEN, NASA_API_KEY
-import keyboards as kb
+# import keyboards as kb
 import random
 import requests
 from datetime import datetime, timedelta
@@ -32,6 +32,10 @@ async def random_apod(message: Message):
    title = apod['title']
 
    await message.answer_photo(photo=photo_url, caption=f"{title}")
+
+@dp.message(CommandStart())
+async def start(message: Message):
+    await message.answer('Привет! Я бот NASA!')
 
 
 
