@@ -5,9 +5,11 @@ from aiogram.types import Message, FSInputFile, CallbackQuery
 import requests
 import os
 from config2 import TOKEN_PLITKA_BOT, OPENAI_API_KEY
-import openai
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+# from telegram import Update
+# from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from openai import OpenAI
+client = OpenAI()
+
 
 # Установите ваш токен и API-ключ
 TOKEN = TOKEN_PLITKA_BOT
@@ -17,6 +19,20 @@ openai.api_key = OPENAI_API_KEY
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
+
+completion = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {
+            "role": "user",
+            "content": "Write a haiku about recursion in programming."
+        }
+    ]
+)
+
+print(completion.choices[0].message)
+
 
 def start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text('Привет! Я бот, готов помочь вам с отделочными материалами.')
