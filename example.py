@@ -1,8 +1,8 @@
 from openai import OpenAI
-from config2 import OPEN_API_K
+from config import OA_KEY
 
 
-client = OpenAI(api_key=OPEN_API_K)
+client = OpenAI(api_key=OA_KEY)
 
 
 completion = client.chat.completions.create(
