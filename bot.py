@@ -7,7 +7,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, FSInputFile
-from config2 import TOKEN
+from config import TOKEN
 import sqlite3
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -85,7 +85,7 @@ async def exhange_rates(message: Message):
             return
         usd_to_rub = data['conversion_rates']['RUB']
         eur_to_usd = data['conversion_rates']['EUR']
-        eur_to_rub = eur_to_usd * usd_to_rub
+        eur_to_rub = usd_to_rub / eur_to_usd
 
         await message.answer(f"1 USD - {usd_to_rub:.2f} RUB\n"
                              f"1 EUR - {eur_to_rub:.2f} RUB")
