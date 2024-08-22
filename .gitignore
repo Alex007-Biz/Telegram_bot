@@ -163,4 +163,5 @@ cython_debug/
 #config.py
 /.idea
 /.idea
-.config2.py
+config2.py
+config.py
