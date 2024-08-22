@@ -149,7 +149,7 @@ async def finances(message: Message, state: FSMContext):
     await state.clear()
 
     await message.answer("Категории и расходы сохранены")
-
+#
 
 async def main():
     await dp.start_polling(bot)
