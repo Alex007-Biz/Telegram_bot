@@ -3,10 +3,10 @@ import logging
 import requests
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
-from aiogram import Bot, Dispatcher, F
+from aiogram import Bot, Dispatcher, F, types, Router
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, FSInputFile
-from config import TOKEN_BOT_ALEX_B
+from config import TOKEN_BOT_ALEX_B, WEATHER_API_KEY
 from datetime import datetime
 import sqlite3
 from aiogram.fsm.context import FSMContext
@@ -61,26 +61,42 @@ async def exhange_rates(message: Message):
 
 
 @dp.message(F.text == "Погода")
-async def weather(message: Message):
-    url = "https://v6.exchangerate-api.com/v6/3f031b399ea3af49d0a38061/latest/USD"
+async def send_location_request(message: Message):
+    # Необходимо явно указывать параметр 'keyboard', даже если пусто
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=[
+            [types.KeyboardButton(text="Отправить местоположение", request_location=True)]
+        ],
+        resize_keyboard=True
+    )
+    await message.answer('Пожалуйста, отправьте свое местоположение (нажмите на кнопку "Отправить местоположение"):', reply_markup=keyboard)
+
+# Используем правильный фильтр для сообщений с местоположением
+@dp.message(F.content_type == "location")
+async def get_location(message: Message):
+    latitude = message.location.latitude
+    longitude = message.location.longitude
+    await message.answer(f"Ваше местоположение: Широта: {latitude}, Долгота: {longitude}")
+
+    # Запрос к API погоды
+    weather_url = f"http://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={WEATHER_API_KEY}&units=metric&lang=ru"
+
     try:
-        response = requests.get(url)
+        response = requests.get(weather_url)
+        response.raise_for_status()  # Проверка на успешный ответ
         data = response.json()
-        if response.status_code != 200:
-            await message.answer("Не удалось данные о курсе валют!")
-            return
-        usd_to_rub = data['conversion_rates']['RUB']
-        eur_to_usd = data['conversion_rates']['EUR']
-        eur_to_rub = usd_to_rub / eur_to_usd
-        # Получаем текущую дату
-        current_date = datetime.now().strftime("%Y-%m-%d")  # Формат: ГГГГ-ММ-ДД
 
-        await message.answer(f"Курс валют на {current_date}:\n"
-                             f"1 USD - {usd_to_rub:.2f} RUB\n"
-                            f"1 EUR - {eur_to_rub:.2f} RUB")
-    except:
-        await message.answer("Произошла ошибка")
+        city = data['name']
+        temperature = data['main']['temp']
+        weather_description = data['weather'][0]['description']
 
+        await message.answer(f"Погода в {city}:\nТемпература: {temperature}°C\nОписание: {weather_description}",
+                             reply_markup=keyboards)
+
+
+    except requests.RequestException as e:
+        await message.answer("Не удалось получить данные о погоде. Пожалуйста, попробуйте позже.")
+        print(f"Ошибка запроса: {e}")
 
 async def main():
     await dp.start_polling(bot)
