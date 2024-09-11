@@ -15,18 +15,20 @@ from aiogram.fsm.state import State, StatesGroup
 import random
 from aiogram.fsm.storage.memory import MemoryStorage
 import aiohttp
+from googletrans import Translator
 
 
 
 bot = Bot(token=TOKEN_BOT_ALEX_B)
 dp = Dispatcher()
+translator = Translator()
 
-# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 button_exhange_rates = KeyboardButton(text="Курс валют")
 button_Nasa = KeyboardButton(text="Фото НАСА")
 button_weather = KeyboardButton(text="Погода")
-button_Thoughts = KeyboardButton(text="Философские мысли")
+button_Thoughts = KeyboardButton(text="Цитаты")
 
 keyboards = ReplyKeyboardMarkup(keyboard=[
     [button_exhange_rates, button_Nasa],
@@ -120,6 +122,36 @@ async def random_apod(message: Message):
     await message.answer_photo(photo=photo_url, caption=f"{title}")
     # else:
     #     await message.answer(f"Сегодняшний медиафайл: {apod['title']}\n{apod['url']}")
+
+def get_quote():
+    url = f'https://zenquotes.io/api/random'
+    response = requests.get(url)
+    return response.json()
+
+# Перевод текста
+def translate_text(text, target_language='ru'):
+    try:
+        # Проверка на наличие текста для перевода
+        if not text:
+            raise ValueError("Текст для перевода не может быть пустым.")
+        translated = translator.translate(text, dest=target_language)
+
+        # Проверка, что перевод действительно был выполнен
+        if translated is None or not translated.text:
+            raise ValueError("Перевод не удался.")
+        return translated.text
+    except Exception as e:
+        print(f"Ошибка при переводе: {e}")
+        return text  # Возвращаем исходный текст в случае ошибки
+
+@dp.message(F.text == "Цитаты")
+async def quote(message: Message):
+   new_quote = get_quote()
+   quote_text = new_quote[0]['q']
+   translated_quote = translate_text(quote_text)
+   author = new_quote[0]['a']
+
+   await message.answer(f'"{translated_quote}" {author}\n')
 
 async def main():
     await dp.start_polling(bot)
