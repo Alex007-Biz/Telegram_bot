@@ -21,7 +21,7 @@ import aiohttp
 bot = Bot(token=TOKEN_BOT_ALEX_B)
 dp = Dispatcher()
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 button_exhange_rates = KeyboardButton(text="Курс валют")
 button_Nasa = KeyboardButton(text="Фото НАСА")
