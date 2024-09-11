@@ -114,12 +114,12 @@ async def random_apod(message: Message):
     # logging.info("Handler random_apod triggered")
     apod = await get_random_apod()
     # logging.info(f"APOD data received: {apod}")
-    if apod['media_type'] == 'image':
-        photo_url = apod['url']
-        title = apod['title']
-        await message.answer_photo(photo=photo_url, caption=f"{title}")
-    else:
-        await message.answer(f"Сегодняшний медиафайл: {apod['title']}\n{apod['url']}")
+    # if apod['media_type'] == 'image':
+    photo_url = apod['url']
+    title = apod['title']
+    await message.answer_photo(photo=photo_url, caption=f"{title}")
+    # else:
+    #     await message.answer(f"Сегодняшний медиафайл: {apod['title']}\n{apod['url']}")
 
 async def main():
     await dp.start_polling(bot)
