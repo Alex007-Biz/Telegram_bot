@@ -6,14 +6,16 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from aiogram import Bot, Dispatcher, F, types, Router
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, FSInputFile
-from config import TOKEN_BOT_ALEX_B, WEATHER_API_KEY
-from datetime import datetime
+from config import TOKEN_BOT_ALEX_B, WEATHER_API_KEY, NASA_API_KEY
+from datetime import datetime, timedelta
+import aiohttp
 import sqlite3
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 import random
 from aiogram.fsm.storage.memory import MemoryStorage
 import aiohttp
+
 
 
 bot = Bot(token=TOKEN_BOT_ALEX_B)
@@ -59,7 +61,6 @@ async def exhange_rates(message: Message):
     except:
         await message.answer("Произошла ошибка")
 
-
 @dp.message(F.text == "Погода")
 async def send_location_request(message: Message):
     # Необходимо явно указывать параметр 'keyboard', даже если пусто
@@ -92,11 +93,33 @@ async def get_location(message: Message):
 
         await message.answer(f"Погода в {city}:\nТемпература: {temperature}°C\nОписание: {weather_description}",
                              reply_markup=keyboards)
-
-
     except requests.RequestException as e:
         await message.answer("Не удалось получить данные о погоде. Пожалуйста, попробуйте позже.")
         print(f"Ошибка запроса: {e}")
+
+async def get_random_apod():
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=365)
+    random_date = start_date + (end_date - start_date) * random.random()
+    date_str = random_date.strftime("%Y-%m-%d")
+    # logging.info(f"Generated date: {date_str}")
+
+    url = f'https://api.nasa.gov/planetary/apod?api_key={NASA_API_KEY}&date={date_str}'
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            return await response.json()
+
+@dp.message(F.text == "Фото НАСА")
+async def random_apod(message: Message):
+    # logging.info("Handler random_apod triggered")
+    apod = await get_random_apod()
+    # logging.info(f"APOD data received: {apod}")
+    if apod['media_type'] == 'image':
+        photo_url = apod['url']
+        title = apod['title']
+        await message.answer_photo(photo=photo_url, caption=f"{title}")
+    else:
+        await message.answer(f"Сегодняшний медиафайл: {apod['title']}\n{apod['url']}")
 
 async def main():
     await dp.start_polling(bot)
