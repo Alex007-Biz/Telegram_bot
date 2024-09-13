@@ -151,7 +151,8 @@ async def quote(message: Message):
    translated_quote = translate_text(quote_text)
    author = new_quote[0]['a']
 
-   await message.answer(f'"{translated_quote}" {author}\n')
+   await message.answer(f'"{translated_quote}" {author}\n'
+                        f'({quote_text})')
 
 async def main():
     await dp.start_polling(bot)
