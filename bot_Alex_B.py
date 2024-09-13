@@ -1,22 +1,24 @@
 import asyncio
 import logging
 import requests
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
-from aiogram import Bot, Dispatcher, F, types, Router
-from aiogram.filters import CommandStart, Command
-from aiogram.types import Message, FSInputFile
-from config import TOKEN_BOT_ALEX_B, WEATHER_API_KEY, NASA_API_KEY
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram import Bot, Dispatcher, F, types
+from aiogram.filters import Command
+from aiogram.types import Message
+from config import TOKEN_BOT_ALEX_B, WEATHER_API_KEY, NASA_API_KEY, NEWS_API_KEY
 from datetime import datetime, timedelta
-import aiohttp
-import sqlite3
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
 import random
-from aiogram.fsm.storage.memory import MemoryStorage
 import aiohttp
 from googletrans import Translator
-
+# import sqlite3
+# from aiogram.fsm.context import FSMContext
+# from aiogram.fsm.state import State, StatesGroup
+# from aiogram.fsm.storage.memory import MemoryStorage
+# from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
+# from aiogram.types import FSInputFile
+# from aiogram.filters import CommandStart
+# from aiogram import Router
+# from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 bot = Bot(token=TOKEN_BOT_ALEX_B)
@@ -26,20 +28,22 @@ translator = Translator()
 logging.basicConfig(level=logging.INFO)
 
 button_exhange_rates = KeyboardButton(text="Курс валют")
-button_Nasa = KeyboardButton(text="Фото НАСА")
+button_News = KeyboardButton(text="Новости")
 button_weather = KeyboardButton(text="Погода")
+button_Nasa = KeyboardButton(text="Фото НАСА")
 button_Thoughts = KeyboardButton(text="Цитаты")
 
+
 keyboards = ReplyKeyboardMarkup(keyboard=[
-    [button_exhange_rates, button_Nasa],
-    [button_weather, button_Thoughts]
+    [button_exhange_rates, button_News, button_weather],
+    [button_Nasa, button_Thoughts]
     ], resize_keyboard=True)
 
 
 @dp.message(Command('start'))
 async def send_start(message: Message):
     await message.answer(f"Приветствую Вас, {message.from_user.full_name}!"
-                         f"\nЯ личный бот Алексея. Выберите одну из опций в меню:", reply_markup=keyboards)
+                         f"\nЯ бот Алексея. Выберите одну из опций в меню:", reply_markup=keyboards)
 
 
 @dp.message(F.text == "Курс валют")
@@ -49,7 +53,7 @@ async def exhange_rates(message: Message):
         response = requests.get(url)
         data = response.json()
         if response.status_code != 200:
-            await message.answer("Не удалось данные о курсе валют!")
+            await message.answer("Не удалось получить данные о курсе валют!")
             return
         usd_to_rub = data['conversion_rates']['RUB']
         eur_to_usd = data['conversion_rates']['EUR']
@@ -62,6 +66,25 @@ async def exhange_rates(message: Message):
                             f"1 EUR - {eur_to_rub:.2f} RUB")
     except:
         await message.answer("Произошла ошибка")
+
+@dp.message(F.text == "Новости")
+async def news(message: Message):
+    url = f'https://newsapi.org/v2/top-headlines?country=us&apiKey={NEWS_API_KEY}'
+    response = requests.get(url)
+    news_data = response.json()
+
+    if news_data['status'] == 'ok':
+        articles = news_data['articles']
+        if articles:
+            news_messages = []
+            for article in articles[:5]:  # Ограничиваем количество новостей
+                news_messages.append(f"{article['title']}\n{article['url']}")
+            await message.answer('\n'.join(news_messages))
+        else:
+            await message.answer('Нет доступных новостей.')
+    else:
+        await message.answer('Произошла ошибка при получении новостей.')
+
 
 @dp.message(F.text == "Погода")
 async def send_location_request(message: Message):
