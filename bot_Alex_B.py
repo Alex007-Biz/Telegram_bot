@@ -6,10 +6,12 @@ from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
 from aiogram.types import Message
 from config import TOKEN_BOT_ALEX_B, WEATHER_API_KEY, NASA_API_KEY, NEWS_API_KEY
+from database import create_table, add_user
 from datetime import datetime, timedelta
 import random
 import aiohttp
 from googletrans import Translator
+import keyboards
 # import sqlite3
 # from aiogram.fsm.context import FSMContext
 # from aiogram.fsm.state import State, StatesGroup
@@ -33,15 +35,33 @@ button_weather = KeyboardButton(text="Погода")
 button_Nasa = KeyboardButton(text="Фото НАСА")
 button_Thoughts = KeyboardButton(text="Цитаты")
 
-
 keyboards = ReplyKeyboardMarkup(keyboard=[
     [button_exhange_rates, button_News, button_weather],
     [button_Nasa, button_Thoughts]
     ], resize_keyboard=True)
 
+# async def create_table():
+#     # Логика создания таблицы
+#     pass
+
+async def on_startup():
+    await create_table()
+
+# async def add_user(user_id, username, first_name, last_name, last_access):
+#     # Здесь должна быть ваша логика сохранения данных пользователя
+#     pass
 
 @dp.message(Command('start'))
 async def send_start(message: Message):
+    user_id = message.from_user.id
+    username = message.from_user.username
+    first_name = message.from_user.first_name
+    last_name = message.from_user.last_name
+    last_access = datetime.now().isoformat()
+
+    # Сохраняем данные о пользователе
+    await add_user(user_id, username, first_name, last_name, last_access)
+    # await message.answer(f"username: {username}\n last_access: {last_access}")
     await message.answer(f"Приветствую Вас, {message.from_user.full_name}!"
                          f"\nЯ бот Алексея. Выберите одну из опций в меню:", reply_markup=keyboards)
 
@@ -178,6 +198,7 @@ async def quote(message: Message):
                         f'({quote_text})')
 
 async def main():
+    await on_startup()  # Вызов функции на старте
     await dp.start_polling(bot)
 
 if __name__ == '__main__':
