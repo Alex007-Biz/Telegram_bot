@@ -47,9 +47,6 @@ keyboards = ReplyKeyboardMarkup(keyboard=[
 async def on_startup():
     await create_table()
 
-# async def add_user(user_id, username, first_name, last_name, last_access):
-#     # Здесь должна быть ваша логика сохранения данных пользователя
-#     pass
 
 @dp.message(Command('start'))
 async def send_start(message: Message):
