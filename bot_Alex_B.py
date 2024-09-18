@@ -40,9 +40,6 @@ keyboards = ReplyKeyboardMarkup(keyboard=[
     [button_Nasa, button_Thoughts]
     ], resize_keyboard=True)
 
-# async def create_table():
-#     # Логика создания таблицы
-#     pass
 
 async def on_startup():
     await create_table()
