@@ -44,24 +44,27 @@ keyboards = ReplyKeyboardMarkup(keyboard=[
 async def on_startup():
     await create_table()
 
-
-@dp.message(Command('start'))
-async def send_start(message: Message):
+async def extract_user_data(message):
     user_id = message.from_user.id
     username = message.from_user.username
     first_name = message.from_user.first_name
     last_name = message.from_user.last_name
     last_access = datetime.now().isoformat()
-
     # Сохраняем данные о пользователе
     await add_user(user_id, username, first_name, last_name, last_access)
-    # await message.answer(f"username: {username}\n last_access: {last_access}")
+
+
+@dp.message(Command('start'))
+async def send_start(message: Message):
+    user_data = await extract_user_data(message)
+
     await message.answer(f"Приветствую Вас, {message.from_user.full_name}!"
                          f"\nЯ бот Алексея. Выберите одну из опций в меню:", reply_markup=keyboards)
 
 
 @dp.message(F.text == "Курс валют")
 async def exhange_rates(message: Message):
+    user_data = await extract_user_data(message)
     url = "https://v6.exchangerate-api.com/v6/3f031b399ea3af49d0a38061/latest/USD"
     try:
         response = requests.get(url)
@@ -78,11 +81,14 @@ async def exhange_rates(message: Message):
         await message.answer(f"Курс валют на {current_date}:\n"
                              f"1 USD - {usd_to_rub:.2f} RUB\n"
                             f"1 EUR - {eur_to_rub:.2f} RUB")
-    except:
-        await message.answer("Произошла ошибка")
+
+    except Exception as e:
+        await message.answer("Произошла ошибка при получении данных.")
+        print(f"Error: {e}")  # Рекомендуется логировать ошибку для дальнейшего анализа
 
 @dp.message(F.text == "Новости")
 async def news(message: Message):
+    user_data = await extract_user_data(message)
     url = f'https://newsapi.org/v2/top-headlines?country=us&apiKey={NEWS_API_KEY}'
     response = requests.get(url)
     news_data = response.json()
@@ -102,6 +108,7 @@ async def news(message: Message):
 
 @dp.message(F.text == "Погода")
 async def send_location_request(message: Message):
+    user_data = await extract_user_data(message)
     # Необходимо явно указывать параметр 'keyboard', даже если пусто
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=[
@@ -150,15 +157,13 @@ async def get_random_apod():
 
 @dp.message(F.text == "Фото НАСА")
 async def random_apod(message: Message):
-    # logging.info("Handler random_apod triggered")
+    user_data = await extract_user_data(message)
     apod = await get_random_apod()
-    # logging.info(f"APOD data received: {apod}")
-    # if apod['media_type'] == 'image':
+
     photo_url = apod['url']
     title = apod['title']
     await message.answer_photo(photo=photo_url, caption=f"{title}")
-    # else:
-    #     await message.answer(f"Сегодняшний медиафайл: {apod['title']}\n{apod['url']}")
+
 
 def get_quote():
     url = f'https://zenquotes.io/api/random'
@@ -183,12 +188,13 @@ def translate_text(text, target_language='ru'):
 
 @dp.message(F.text == "Цитаты")
 async def quote(message: Message):
-   new_quote = get_quote()
-   quote_text = new_quote[0]['q']
-   translated_quote = translate_text(quote_text)
-   author = new_quote[0]['a']
+    user_data = await extract_user_data(message)
+    new_quote = get_quote()
+    quote_text = new_quote[0]['q']
+    translated_quote = translate_text(quote_text)
+    author = new_quote[0]['a']
 
-   await message.answer(f'"{translated_quote}" {author}\n'
+    await message.answer(f'"{translated_quote}" {author}\n'
                         f'({quote_text})')
 
 async def main():
