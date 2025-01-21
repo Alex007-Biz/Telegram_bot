@@ -12,6 +12,7 @@ import random
 import aiohttp
 from googletrans import Translator
 import keyboards
+# from deep_translator import GoogleTranslator
 # import sqlite3
 # from aiogram.fsm.context import FSMContext
 # from aiogram.fsm.state import State, StatesGroup
@@ -26,6 +27,7 @@ import keyboards
 bot = Bot(token=TOKEN_BOT_ALEX_B)
 dp = Dispatcher()
 translator = Translator()
+# translator = GoogleTranslator(source='en', target='ru')
 
 logging.basicConfig(level=logging.INFO)
 
